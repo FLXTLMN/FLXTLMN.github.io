@@ -1,0 +1,190 @@
+body, html {
+margin: 0;
+padding: 0;
+height: 100%;
+overflow: hidden;
+}
+
+.filter_panel,
+.information_panel {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: lighter;
+}
+
+.filter_panel h1,
+.information_panel h1 {
+    font-size: 24px; /* Adjust the font size for h1 within .information_panel */
+    text-align: center;
+}
+
+.filter_panel h2,
+.information_panel h2 {
+    font-size: 20px; /* Adjust the font size for h2 within .information_panel */
+}
+
+.filter_panel {
+    height: 100%;
+    background-color: #e9e8e8;
+    padding: 20px;
+    border-radius: 20px;
+    transition: right 0.3s ease; /* Transition for sliding animation */
+  }
+
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#tags-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+  
+.tag {
+    background-color: #3b3b3b;
+    border-radius: 10px;
+    padding: 5px 10px;
+    margin: 5px;
+    color: white;
+    font-size: 12px;
+} 
+
+/* New styles for the filter panel tags */
+.filter-tag {
+    background-color: #3b3b3b;
+    border-radius: 10px;
+    padding: 5px 10px;
+    margin: 5px;
+    color: white;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease; /* Add transition effect for border color */
+}
+
+.filter-tag.clicked {
+    border-color: red; /* Change border color when clicked */
+}
+
+
+#image {
+    min-width: 100%;
+    min-height: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    transition: opacity 0.3s ease, transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+
+.button {
+    position: fixed;
+    bottom: 50px;
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.button:active {
+    transform: scale(0.8); /* Slight scale down when button is pressed */
+}
+
+#like {
+    left: calc(50% + 150px);
+    z-index: 10;
+}
+
+#dislike {
+    left: calc(50% - 250px);
+    z-index: 10;
+}
+
+#neutral {
+    left: calc(50% - 50px);
+    z-index: 10;
+}
+  
+/* New styles for the info container */
+#info-container {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    bottom: 10px;
+    width: 300px;
+    max-height: calc(100% - 20px); /* Set maximum height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    background-color: #e9e8e8;
+    padding: 20px;
+    z-index: 1;
+    border-radius: 20px;
+}
+
+#energy-icon {
+    width: 18px; /* Adjust the width of the icon */
+    height: auto; /* Adjust the height of the icon */
+    margin-right: 20px; /* Add some margin between the icon and the text */
+}
+
+#time-icon {
+    width: 18px; /* Adjust the width of the icon */
+    height: auto; /* Adjust the height of the icon */
+    margin-right: 20px; /* Add some margin between the icon and the text */
+}
+
+#preparation-steps {
+    margin-top: 10px;
+}
+    
+#preparation-steps p {
+    margin-bottom: 5px;
+}
+
+#filter-container {
+    position: fixed;
+    right: 10px;
+    top: 10px;
+    max-height: calc(96% - 20px); /* Set maximum height */
+    bottom: 10px;
+    width: 200px;
+    z-index: 1;
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+
+#toggle-filter {
+    position: fixed;
+    rotate: 0deg;
+    top: 5%;
+    right: 190px;
+    padding: 5px;
+    font-size: 16px;
+    background-color: #000000; /* Blue color, adjust as needed */
+    color: #fff; /* White text color */
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 2; /* Ensure the button is above other elements */
+    transition: right 0.3s ease; /* Transition for sliding animation */
+  }
+
+#recipe-link {
+text-decoration: none; /* Remove underline */
+color: inherit; /* Inherit color from parent */
+cursor: default; /* Change cursor to default */
+}
+
+.filter-button-image {
+    width: 25px; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
+    -webkit-filter: invert(1);
+    filter: invert(1);
+  }

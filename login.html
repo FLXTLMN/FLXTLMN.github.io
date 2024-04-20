@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 400px; /* Adjust width as needed */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 20px); /* Adjust width as needed */
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+
+            // Read the CSV file
+            fetch('Python/login.csv')
+            .then(response => response.text())
+            .then(data => {
+                // Split the CSV into rows
+                var rows = data.split('\n');
+                
+                // Loop through each row
+                for (var i = 0; i < rows.length; i++) {
+                    var row = rows[i].split(';');
+                    
+                    // Check if username and password match
+                    console.log('TRY')
+                    console.log(row[0])
+                    console.log(username)
+                    console.log(row[1])
+                    console.log(password)
+                    if (row[0].trim() === username && row[1].trim() === password) {
+                        // Set authentication flag in local storage
+                        localStorage.setItem("authenticated", "true");
+                        
+                        // Redirect to swipe.html
+                        console.log('CORRECT!!!')
+                        window.location.href = 'index.html';
+                        break; // Exit the loop
+                    }
+                }
+                // If no match found, show an alert
+                alert("Invalid username or password.");
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
