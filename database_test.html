@@ -1,464 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tinder-Like Image Swiper</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write to Google Sheets</title>
 </head>
 <body>
-<div id="info-container" class="information_panel">
-  <!-- Title-->
-  <h1><a id="recipe-link" href="#">Welcome!</a></h1>
-  <p>Klik op en knop om te beginnen!</p>
-  <h2></h2> <!--Tags-->
-  <div id="tags-container"></div>
-  <h2></h2> <!--Macros-->
-  <p id="energy-info" style="display: none;">
-    <span id="energy-text"></span>
-    <span id="energy-value"></span>
-  </p>
-  <p id="protein-info" style="display: none;">
-    <span id="protein-text"></span>
-    <span id="protein-value"></span>
-  </p> 
-  <p id="fat-info" style="display: none;">
-    <span id="fat-text"></span>
-    <span id="fat-value"></span>
-  </p>
-  <p id="carbs-info" style="display: none;">
-    <span id="carbs-text"></span>
-    <span id="carbs-value"></span>
-  </p>  
 
-  <h2></h2> <!--Time-->
-  <p id="time-info" style="display: none;">
-    <img id="time-icon" src="" alt="Time Icon">
-    <span id="time-value"></span>
-  </p>  
-  <h2></h2> <!--Prep-->
-  <div id="preparation-steps"></div>
-</div>
-<div id="container">
-  <img id="image" src="images/welcome.jpg" alt="Recipe Image">
-</div>
-<div class="button-container">
-    <img id="like" src="images/icons/like.png" alt="Like" class="button">
-    <img id="neutral" src="images/icons/neutral.png" alt="Neutral" class="button">
-    <img id="dislike" src="images/icons/dislike.png" alt="Dislike" class="button">
-</div>
-
-<!-- Button to toggle filter panel -->
-<button id="toggle-filter">
-  <img src="images/icons/Minus.png" alt="Toggle Filter" class="filter-button-image">
-</button>
-<div id="filter-container" class="filter_panel">
-  <h1>Filters</h1>
-  <input hidden type="text" id="tag-search" placeholder="Search tags...">
-
-  <div class="filter-tags">
-    <!-- Filter tags will be dynamically added here -->
-  </div>
-</div>
-
+<button onclick="authenticateAndWrite()">Click Me</button>
 
 <script>
-  let infoUpdated = false; // Flag to track if information has been updated
-
-  async function getData() {
-    try {
-      const response = await fetch(`Python/recipes.csv`);
-      const table = await response.text();
-      const rows = table.split('\n');
-      const headers = rows[0].split(';').map(header => header.replace(/\r/g, ''));
-      const data = {};
-
-      // Shuffle rows excluding the header
-      const shuffledRows = rows.slice(1);
-      for (let i = shuffledRows.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledRows[i], shuffledRows[j]] = [shuffledRows[j], shuffledRows[i]];
-      }
-
-      // Add shuffled rows to data
-      for (let i = 0; i < shuffledRows.length; i++) {
-        const rowData = shuffledRows[i].split(';'); // Split each row by semicolon
-        for (let j = 0; j < headers.length; j++) {
-          if (!data[headers[j]]) {
-            data[headers[j]] = [];
-          }
-          data[headers[j]].push(rowData[j]);
-        }
-      }
-      return data;
-    } catch (error) {
-      console.error('Error fetching data from CSV:', error);
-      return {};
+    // Function to authenticate and write data to Google Sheets
+    function authenticateAndWrite() {
+        gapi.auth2.getAuthInstance().signIn().then(() => {
+            writeToSheet();
+        });
     }
-  }
 
-  async function updateInformationPanel(recipesData, currentImageIndex) {
-    try {
-      if (!infoUpdated) return; // If infoUpdated is false, exit the function
-
-        // General data definitions
-        const titleHeader = document.querySelector('.information_panel h1 a');
-        const subtitleHeaders = document.querySelectorAll('.information_panel h2');
-        const infoParagraphs = document.querySelectorAll('.information_panel p');
-
-        // Icon Paragraph definitions
-        const energyInfo = document.getElementById('energy-info');
-        const proteinInfo = document.getElementById('protein-info');
-        const fatInfo = document.getElementById('fat-info');
-        const carbsInfo = document.getElementById('carbs-info');
-        const timeInfo = document.getElementById('time-info')
-
-        // Top Info
-        titleHeader.style.textAlign = 'left';
-        titleHeader.textContent = recipesData['Recipe Title'][currentImageIndex-1];
-        titleHeader.href = '#'; // Reset href attribute to prevent navigation
-        titleHeader.href = 'https://www.ah.nl/allerhande';
-        infoParagraphs[0].textContent = '';
+    // Function to write data to Google Sheets
+    function writeToSheet() {
+        const spreadsheetId = 'YOUR_SPREADSHEET_ID';
+        const range = 'Sheet1!A1'; // Change this to the desired range
         
-        // Macros
-        subtitleHeaders[1].textContent = 'Macros (1p)';
-        if (recipesData['Energy'][currentImageIndex-1]) {
-          energyInfo.style.display = 'block'; // Show the energy info container
-          document.getElementById('energy-text').textContent = 'Energie: ';
-          document.getElementById('energy-value').textContent = recipesData['Energy'][currentImageIndex-1];
-        } else {
-          energyInfo.style.display = 'none'; // Show the energy info container
-          document.getElementById('energy-text').textContent = '';
-          document.getElementById('energy-value').textContent = '';
-        }
-        if (recipesData['Protein'][currentImageIndex-1]) {
-          proteinInfo.style.display = 'block'; // Show the energy info container
-          document.getElementById('protein-text').textContent = 'Eiwit: ';
-          document.getElementById('protein-value').textContent = recipesData['Protein'][currentImageIndex-1];
-        } else {
-          proteinInfo.style.display = 'none'; // Show the energy info container
-          document.getElementById('energy-text').textContent = '';
-          document.getElementById('protein-value').textContent = '';
-        }
-        if (recipesData['Fat'][currentImageIndex-1]) {
-          fatInfo.style.display = 'block'; // Show the energy info container
-          document.getElementById('fat-text').textContent = 'Vet: ';
-          document.getElementById('fat-value').textContent = recipesData['Fat'][currentImageIndex-1];
-        } else {
-          fatInfo.style.display = 'none'; // Show the energy info container
-          document.getElementById('fat-text').textContent = '';
-          document.getElementById('fat-value').textContent = '';
-        }
-        if (recipesData['Carbs'][currentImageIndex-1]) {
-          carbsInfo.style.display = 'block'; // Show the energy info container
-          document.getElementById('carbs-text').textContent = 'Carbs: ';
-          document.getElementById('carbs-value').textContent = recipesData['Carbs'][currentImageIndex-1];
-        } else {
-          carbsInfo.style.display = 'none'; // Show the energy info container
-          document.getElementById('carbs-text').textContent = '';
-          document.getElementById('carbs-value').textContent = '';
-        }
+        const data = {
+            values: [
+                [1] // Data you want to write
+            ]
+        };
 
-        // Tags
-        const tagsContainer = document.getElementById('tags-container');
-        tagsContainer.innerHTML = ''; // Clear previous tags
-
-        const tags = recipesData['Filters'][currentImageIndex - 1].replace('[', '')
-          .replace(']', '')
-          .replace(/'/g, '')
-          .split(',');
-
-        tags.forEach(tag => {
-          const tagElement = document.createElement('div');
-          tagElement.classList.add('tag');
-          tagElement.textContent = tag.trim();
-          tagsContainer.appendChild(tagElement);
+        gapi.client.sheets.spreadsheets.values.append({
+            spreadsheetId: spreadsheetId,
+            range: range,
+            valueInputOption: 'USER_ENTERED',
+            resource: data
+        }).then(response => {
+            console.log('Data written successfully:', response);
+            alert('Data written successfully!');
+        }, error => {
+            console.error('Error:', error.result.error.message);
+            alert('Failed to write data to spreadsheet');
         });
-
-        subtitleHeaders[2].textContent = 'Time';
-        if (recipesData['Time'][currentImageIndex - 1]) {
-          timeInfo.style.display = 'block'; // This should be timeInfo
-          document.getElementById('time-icon').src = 'images/icons/TimeIcon.png';
-          document.getElementById('time-value').textContent = recipesData['Time'][currentImageIndex - 1];
-        } else {
-          timeInfo.style.display = 'none'; // This should be timeInfo
-          document.getElementById('time-icon').src = '';
-          document.getElementById('time-value').textContent = '';
-        }
-
-        subtitleHeaders[3].textContent = 'Preparation';
-        const prepStepsContainer = document.getElementById('preparation-steps');
-        prepStepsContainer.innerHTML = '';
-        const preparationSteps = recipesData['Preparation'][currentImageIndex - 1].split("', '");
-        preparationSteps.forEach((step, index) => {
-            step = step.slice(2, -2);
-
-            const stepElement = document.createElement('p');
-            stepElement.textContent = `Step ${index + 1}: ${step.trim()}`;
-            prepStepsContainer.appendChild(stepElement);
-        });
-          
-        infoUpdated = true;
-      } catch (error) {
-        console.error('Error updating information panel:', error);
-      }
     }
-
-  async function populateFilterPanel(manualTags) {
-    try {
-      const filterContainer = document.getElementById('filter-container');
-      const filterTagsContainer = filterContainer.querySelector('.filter-tags'); // Get the filter tags container div
-      filterTagsContainer.innerHTML = ''; // Clear previous content
-
-      // Create and append filtered tags
-      manualTags.forEach(tag => {
-        const tagElement = document.createElement('div');
-        tagElement.classList.add('filter-tag'); // Add the filter-tag class
-        tagElement.textContent = tag;
-        filterTagsContainer.appendChild(tagElement);
-
-        // Add event listener to toggle the "clicked" class on click
-        tagElement.addEventListener('click', function() {
-          this.classList.toggle('clicked');
-        });
-      });
-
-      const searchInput = filterContainer.querySelector('#tag-search'); // Get the search input
-      // Add event listener to filter tags when the search input changes
-      searchInput.addEventListener('input', function() {
-        const filteredTags = manualTags.filter(tag => tag.toLowerCase().includes(this.value.toLowerCase()));
-
-        // Clear previous tags
-        filterTagsContainer.innerHTML = '';
-
-        // Append filtered tags
-        filteredTags.forEach(tag => {
-          const tagElement = document.createElement('div');
-          tagElement.classList.add('filter-tag'); // Add the filter-tag class
-          tagElement.textContent = tag;
-          filterTagsContainer.appendChild(tagElement);
-
-          // Add event listener to toggle the "clicked" class on click
-          tagElement.addEventListener('click', function() {
-            this.classList.toggle('clicked');
-            globalThis.IterIndex = 0
-          });
-        });
-
-        // Focus on the search input after each input event
-        searchInput.focus();
-      });
-
-      // Initialize filtering with empty search input
-      searchInput.dispatchEvent(new Event('input'));
-    } catch (error) {
-      console.error('Error populating filter panel:', error);
-    }
-  }
-
-  // Call the function to update information panel when the page loads
-  window.addEventListener('load', async () => {
-    const recipesData = await getData();
-    globalThis.IterIndex = 0;
-    let currentImageIndex = 0;
-    const manualTags = ['hoofdgerecht', 'vegetarisch', 'snel', 'budget', 'lactosevrij', 'gezond', 'eiwitrijk', 'glutenvrij', 'veganistisch', 'italiaans', 'mexicaans', 'mediteraans', 'amerikaans' ];
-    await populateFilterPanel(manualTags);
-    await updateInformationPanel(recipesData, currentImageIndex);
-    const PhotoPath = recipesData['Photo'];  
-    const images = [];
-    images.push("images/welcome.jpg");
-
-    for (let i = 0; i < PhotoPath.length; i++) {
-        images.push(PhotoPath[i]);
-    }
-    const imageElement = document.getElementById('image');
-    const likeButton = document.getElementById('like');
-    const dislikeButton = document.getElementById('dislike');
-    const neutralButton = document.getElementById('neutral');
-    const infoTitle = document.querySelector('.information_panel h1');
-    const recipeLink = document.getElementById('recipe-link');
-
-
-    globalThis.currentIndexHistory = [];
-    let FilteredIndexMatrix = [];
-
-    for (let i = 0; i < manualTags.length + 1; i++) {
-      let row = [];
-      for (let j = 0; j < images.length; j++) {
-        row.push(j);
-      }
-      // For the second row onwards, filter the indices based on the 'hoofdgerecht' tag
-      if (i > 0) {
-        row = row.filter(index => recipesData['Filters'][index] && recipesData['Filters'][index].includes(manualTags[i - 1]));
-        row = row.map((index, rowIndex) => rowIndex === 0 ? index : index + 1); // add 1 to avoid headers to be included
-      }
-      // Push the row into FilteredIndexMatrix
-      FilteredIndexMatrix.push(row);
-    }
-
-    likeButton.addEventListener('click', () => {
-      if (IterIndex < images.length - 1) {
-        IterIndex++;
-
-        const selectedFilters = Array.from(document.querySelectorAll('.filter-tag.clicked')).map(tag => tag.textContent);
-        let selectedRowIndex = 0; // Default to the unfiltered row
-
-        selectedRowIndices = selectedFilters.map(filter => {
-            const index = manualTags.findIndex(tag => tag === filter);
-            return index !== -1 ? index + 1 : 0; // If not found, default to 0 (unfiltered row)
-        });
-
-        if (selectedRowIndices.length === 0) {
-          completeIndexArray = FilteredIndexMatrix[0]
-        } else if (selectedRowIndices.length === 1) {
-          completeIndexArray = FilteredIndexMatrix[selectedRowIndices[0]]
-        } else {
-          let commonElements = [];
-          commonElements = FilteredIndexMatrix[selectedRowIndices[0]].slice();
-
-          for (let i = 1; i < selectedRowIndices.length; i++) {
-              const currentRow = FilteredIndexMatrix[selectedRowIndices[i]];
-              commonElements = commonElements.filter(element => currentRow.includes(element));
-          }
-          completeIndexArray = commonElements.sort((a, b) => a - b);
-        }
-        historyAdaptedCompleteIndexArray = completeIndexArray.filter(item => !globalThis.currentIndexHistory.includes(item));
-        currentImageIndex = historyAdaptedCompleteIndexArray[IterIndex];
-
-        console.log(globalThis.IterIndex)
-        console.log(currentImageIndex)
-        imageElement.style.opacity = '0';
-        likeButton.classList.add('button-clicked'); // Add button-clicked class
-        infoUpdated = true; // Set flag to true when button is clicked
-        setTimeout(() => {
-          imageElement.src = images[currentImageIndex];
-          imageElement.style.opacity = '1';
-          likeButton.classList.remove('button-clicked'); // Remove button-clicked class after a short delay
-          updateInformationPanel(recipesData, currentImageIndex); // Update information panel after image change
-        }, 150); // Adjust this value to match the transition duration
-
-        globalThis.currentIndexHistory.push(currentImageIndex);
-        console.log(globalThis.currentIndexHistory)
-      }
-    });
-
-    neutralButton.addEventListener('click', () => {
-      if (IterIndex < images.length - 1) {
-        IterIndex++;
-
-        const selectedFilters = Array.from(document.querySelectorAll('.filter-tag.clicked')).map(tag => tag.textContent);
-        let selectedRowIndex = 0; // Default to the unfiltered row
-
-        selectedRowIndices = selectedFilters.map(filter => {
-            const index = manualTags.findIndex(tag => tag === filter);
-            return index !== -1 ? index + 1 : 0; // If not found, default to 0 (unfiltered row)
-        });
-
-        if (selectedRowIndices.length === 0) {
-          completeIndexArray = FilteredIndexMatrix[0]
-        } else if (selectedRowIndices.length === 1) {
-          completeIndexArray = FilteredIndexMatrix[selectedRowIndices[0]]
-        } else {
-          let commonElements = [];
-          commonElements = FilteredIndexMatrix[selectedRowIndices[0]].slice();
-
-          for (let i = 1; i < selectedRowIndices.length; i++) {
-              const currentRow = FilteredIndexMatrix[selectedRowIndices[i]];
-              commonElements = commonElements.filter(element => currentRow.includes(element));
-          }
-          completeIndexArray = commonElements.sort((a, b) => a - b);
-        }
-        historyAdaptedCompleteIndexArray = completeIndexArray.filter(item => !globalThis.currentIndexHistory.includes(item));
-        currentImageIndex = historyAdaptedCompleteIndexArray[IterIndex];
-
-        imageElement.style.opacity = '0';
-        neutralButton.classList.add('button-clicked'); // Add button-clicked class
-        infoUpdated = true; // Set flag to true when button is clicked
-        setTimeout(() => {
-          imageElement.src = images[currentImageIndex];
-          imageElement.style.opacity = '1';
-          neutralButton.classList.remove('button-clicked'); // Remove button-clicked class after a short delay
-          updateInformationPanel(recipesData, currentImageIndex); // Update information panel after image change
-        }, 150); // Adjust this value to match the transition duration
-
-        globalThis.currentIndexHistory.push(currentImageIndex);
-      }
-    });
-
-    dislikeButton.addEventListener('click', () => {
-      if (IterIndex < images.length - 1) {
-        IterIndex++;
-
-        // Update currentImageIndex based on selected filters
-        const selectedFilters = Array.from(document.querySelectorAll('.filter-tag.clicked')).map(tag => tag.textContent);
-        let selectedRowIndex = 0; // Default to the unfiltered row
-
-        // Find the indices of the selected filter tags in manualTags and add 1
-        selectedRowIndices = selectedFilters.map(filter => {
-            const index = manualTags.findIndex(tag => tag === filter);
-            return index !== -1 ? index + 1 : 0; // If not found, default to 0 (unfiltered row)
-        });
-
-        if (selectedRowIndices.length === 0) {
-          completeIndexArray = FilteredIndexMatrix[0]
-        } else if (selectedRowIndices.length === 1) {
-          completeIndexArray = FilteredIndexMatrix[selectedRowIndices[0]]
-        } else {
-          let commonElements = [];
-          commonElements = FilteredIndexMatrix[selectedRowIndices[0]].slice();
-
-          for (let i = 1; i < selectedRowIndices.length; i++) {
-              const currentRow = FilteredIndexMatrix[selectedRowIndices[i]];
-              commonElements = commonElements.filter(element => currentRow.includes(element));
-          }
-          completeIndexArray = commonElements.sort((a, b) => a - b);
-        }
-        historyAdaptedCompleteIndexArray = completeIndexArray.filter(item => !globalThis.currentIndexHistory.includes(item));
-        currentImageIndex = historyAdaptedCompleteIndexArray[IterIndex];
-        
-        imageElement.style.opacity = '0';
-        dislikeButton.classList.add('button-clicked'); // Add button-clicked class
-        infoUpdated = true; // Set flag to true when button is clicked
-        setTimeout(() => {
-          imageElement.src = images[currentImageIndex];
-          imageElement.style.opacity = '1';
-          dislikeButton.classList.remove('button-clicked'); // Remove button-clicked class after a short delay
-          updateInformationPanel(recipesData, currentImageIndex); // Update information panel after image change
-        }, 150); // Adjust this value to match the transition duration
-
-        globalThis.currentIndexHistory.push(currentImageIndex);
-      }
-    });
-
-    const filterButton = document.getElementById('toggle-filter');
-    const filterPanel = document.getElementById('filter-container');
-    let filterOpen = true;
-
-    filterButton.addEventListener('click', function() {
-      if (filterOpen) {
-        filterPanel.style.right = '-220px'; // Slide off-screen
-        filterButton.style.right = '5px';
-        filterButton.querySelector('img').src = 'images/icons/Toggle.png'
-        filterOpen = false;
-      } else {
-        filterPanel.style.right = '10px'; // Slide into view
-        filterButton.style.right = '190px';
-        filterButton.querySelector('img').src = 'images/icons/Minus.png'
-        filterOpen = true;
-      }
-    });
-
-    window.addEventListener('beforeunload', function (e) {
-      // Cancel the event
-      e.preventDefault();
-      // Chrome requires returnValue to be set
-      e.returnValue = '';
-
-      // Return a message to be displayed in the confirmation dialog
-      return 'Are you sure you want to refresh? Your unsaved data will be lost.';
-    });
-  });
 </script>
+
+<!-- Load the Google API client library -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+    // Load the Google Sheets API
+    gapi.load('client:auth2', initClient);
+
+    function initClient() {
+        gapi.client.init({
+            apiKey: 'YOUR_API_KEY', // Replace with your API key
+            clientId: 'YOUR_CLIENT_ID', // Replace with your client ID
+            discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            scope: "https://www.googleapis.com/auth/spreadsheets"
+        }).then(() => {
+            // Listen for sign-in state changes.
+            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+            // Handle the initial sign-in state.
+            updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+        });
+    }
+
+    function updateSigninStatus(isSignedIn) {
+        // Handle changes in authentication status
+    }
+</script>
+
 </body>
 </html>
