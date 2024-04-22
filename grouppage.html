@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favoriete recepten van jouw groep:</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f4f4f4; /* Light grey background */
+  margin: 0; /* Remove default margin */
+  padding: 20px; /* Add padding for spacing */
+}
+
+.item {
+  position: relative; /* Position relative for absolute positioning of photo */
+  border: 2px solid #ccc; /* Add border around each recipe */
+    border-bottom: 4px solid #ccc;
+  border-radius: 8px; /* Add border radius */
+  padding: 20px; /* Add padding for spacing */
+  margin-bottom: 20px; /* Add margin between recipes */
+  background-color: #fff; /* White background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add box shadow */
+  transition: transform 0.3s ease; /* Add smooth transition */
+  height: 250px; /* Set height of item */
+}
+
+.item:hover {
+  transform: translateY(-5px); /* Add slight upward translation on hover */
+}
+
+.item h2 {
+  margin: 0; /* Remove default margin */
+  padding-left: 35px;
+  font-size: 28px; /* Increase font size */
+  margin-bottom: 10px; /* Add margin at the bottom of title */
+  color: #333; /* Dark text color */
+}
+
+.item img {
+  max-width: 100%; /* Make images fill their container */
+  height: auto;
+  border-radius: 8px; /* Add border radius */
+}
+
+.speed-info {
+  position: absolute; /* Position absolute for precise placement */
+  top: 90%; /* Position at 50% from top */
+  transform: translateY(-50%); /* Center vertically */
+  left: 20px; /* Position from right */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack items vertically */
+  align-items: flex-end; /* Align items to the right */
+}
+
+.speed-img {
+  width: 30px; /* Set width of speed image */
+  height: auto;
+  margin-right: 25px; /* Add margin between speed image and score */
+}
+
+.score {
+  font-size: 16px; /* Adjust font size */
+  color: #666; /* Light text color */
+  margin-right: 5px;
+}
+
+.recipe-photo {
+  position: absolute; /* Position absolute for positioning within parent */
+  width: 250px; /* Set width of recipe photo */
+  margin-right: 20px; /* Add margin for spacing */
+  right: 20px; /* Position from right */
+  top: 50px; /* Position from top */
+}
+
+.title {
+  text-align: center; /* Center the title */
+  font-size: 36px; /* Increase font size */
+  margin-bottom: 30px; /* Add more margin at the bottom of the title */
+  color: #333; /* Dark text color */
+    border: 0px solid;
+    border-bottom: 4px;
+    border-bottom-color: #333333;
+}
+
+.number {
+  position: absolute; /* Position absolute for precise placement */
+  top: 15px; /* Position from top */
+  left: 20px; /* Position from left */
+  font-size: 24px; /* Adjust font size */
+  font-weight: bold; /* Add bold font weight */
+  color: #fff; /* Dark text color */
+  background-color:#333;
+  padding: 5px 5px; /* Add padding to the number */
+  border-radius: 10%; /* Make the background a circle */
+}
+
+/* Media Query for Mobile Devices */
+@media only screen and (max-width: 768px) {
+  .item {
+    height: auto; /* Set height to auto for responsive height */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack items vertically */
+  }
+
+  .recipe-photo {
+    width: 100%; /* Make photo width 100% */
+    margin-right: 0; /* Remove right margin */
+    margin-bottom: 20px; /* Add bottom margin */
+    position: static; /* Remove absolute positioning */
+  }
+
+  .speed-info {
+    position: static; /* Remove absolute positioning */
+    margin-top: 10px; /* Add top margin */
+  }
+
+  .number {
+    position: static; /* Remove absolute positioning */
+    margin-bottom: 10px; /* Add bottom margin */
+  }
+}
+</style>
+</head>
+<body>
+
+<h1 class="title">Favoriete recepten van jouw groep:</h1>
+
+<div id="recipe-container">
+
+</div>
+
+<script>
+// Function to get image source based on netLikes score
+function getImageSrc(netLikes) {
+    // Define the image source based on netLikes score
+    if (netLikes > 50) {
+        return "score100.png";
+    } else if (netLikes > 0) {
+        return "score50.png";
+    } else if (netLikes > -50) {
+        return "score0.png";
+    } else if (netLikes > -101) {
+        return "score-50.png";
+    }
+}
+function getColorForPercentage(netLikesPercent) {
+    // Convert percentage to a value between 0 and 1
+    const value = netLikesPercent / 100;
+
+    // Calculate the RGB values for red, green, and blue
+    let red = 255;
+    let green = 255;
+    let blue = 0;
+
+    if (value < 0.5) {
+        red = 255;
+        green = Math.round(value * 2 * 255);
+    } else {
+        red = Math.round((1 - value) * 2 * 255);
+        green = 255;
+    }
+
+    // Convert RGB values to hexadecimal
+    const redHex = red.toString(16).padStart(2, '0');
+    const greenHex = green.toString(16).padStart(2, '0');
+    const blueHex = blue.toString(16).padStart(2, '0');
+
+    // Combine RGB values into a color code
+    return `#${redHex}${greenHex}00`; // Green component is always 00
+}
+// Fetching data from CSV
+fetch('Recipe_scores.csv')
+  .then(response => response.text())
+  .then(data => {
+    // Splitting CSV data into rows
+    const rows = data.split('\n');
+    // Define an array to store recipe objects
+    const recipes = [];
+    // Iterate over the rows (excluding header)
+    for (let i = 1; i < rows.length; i++) {
+        // Split the current row into columns
+        const columns = rows[i].split(';');
+        // Get the recipe title, photo URL, likes, and dislikes from the current row
+        const recipeTitle = columns[0];
+        const photoURL = columns[2];
+        const likes = parseInt(columns[4]); // Convert likes to integer
+        const dislikes = parseInt(columns[5]); // Convert dislikes to integer
+        const neutral = parseInt(columns[6]);
+        // Calculate net likes (likes minus dislikes)
+        const netLikes = Math.round((likes - dislikes) / (likes + dislikes + neutral) *100);
+        // Calculate net likes percentage
+        const netLikesPercent = (netLikes + 100) / 2; // Convert netLikes to a percentage
+
+        // Get the image source based on netLikes score
+        const imgSrc = getImageSrc(netLikes);
+        // Create a recipe object and push it to the array
+        recipes.push({ recipeTitle, photoURL, netLikes, imgSrc });
+    }
+    // Sort the recipes array by net likes in descending order
+    recipes.sort((a, b) => b.netLikes - a.netLikes);
+    // Iterate over the sorted recipes
+    recipes.forEach((recipe, index) => {
+        // Create HTML elements for each recipe
+        const container = document.getElementById('recipe-container');
+
+        const item = document.createElement('div');
+        item.classList.add('item');
+
+        const title = document.createElement('h2');
+        title.textContent = recipe.recipeTitle;
+
+        const speedInfo = document.createElement('div');
+        speedInfo.classList.add('speed-info');
+
+        const speedImage = document.createElement('img');
+        speedImage.src = recipe.imgSrc;
+        speedImage.alt = "Speed";
+        speedImage.classList.add('speed-img');
+
+        const score = document.createElement('span');
+        score.textContent = `Score: ${recipe.netLikes}`;
+        score.classList.add('score');
+
+        speedInfo.appendChild(speedImage);
+        speedInfo.appendChild(score);
+
+        const photoDiv = document.createElement('div');
+        photoDiv.classList.add('recipe-photo');
+
+        const image = document.createElement('img');
+        image.src = recipe.photoURL;
+        image.alt = "Recipe Photo";
+
+        photoDiv.appendChild(image);
+
+        const number = document.createElement('div');
+        number.classList.add('number');
+        number.textContent = `${grouppage + 1}.`;
+
+        item.appendChild(number);
+        item.appendChild(title);
+        item.appendChild(speedInfo);
+        item.appendChild(photoDiv);
+
+        // Set the bottom border color dynamically
+        item.style.borderBottomColor = getColorForPercentage((recipe.netLikes + 100) / 2);
+        container.appendChild(item);
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching or processing data:', error);
+  });
+</script>
+
+</body>
+</html>
